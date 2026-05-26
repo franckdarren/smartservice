@@ -14,23 +14,35 @@ import {
   User,
   Calendar,
   Wrench,
+  CreditCard,
 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import {
-  markInvoicePaid,
   markInvoiceSent,
   generateInvoicePdf,
 } from "@/server/actions/invoices";
 import { toast } from "sonner";
-import type { InvoiceStatus, Tenant } from "@/types";
+import { PaymentModal } from "@/features/invoices/payment-modal";
+import type { InvoiceStatus, PaymentMethod, Tenant } from "@/types";
+
+const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
+  cash: "Espèces",
+  airtel_money: "Airtel Money",
+  moov_money: "Moov Money",
+  virement: "Virement bancaire",
+  cheque: "Chèque",
+};
 
 interface InvoiceDetailViewProps {
   invoice: {
     id: string;
     amount: number;
     status: InvoiceStatus;
+    paymentMethod: PaymentMethod | null;
+    paidAt: Date | null;
+    paymentReference: string | null;
     pdfUrl: string | null;
     createdAt: Date;
     customerName: string | null;
@@ -54,6 +66,16 @@ export function InvoiceDetailView({ invoice, tenant }: InvoiceDetailViewProps) {
   const [generating, setGenerating] = useState(false);
   const [pdfUrl, setPdfUrl] = useState(invoice.pdfUrl);
   const [status, setStatus] = useState<InvoiceStatus>(invoice.status);
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+  const [paymentInfo, setPaymentInfo] = useState<{
+    method: PaymentMethod | null;
+    paidAt: Date | null;
+    reference: string | null;
+  }>({
+    method: invoice.paymentMethod,
+    paidAt: invoice.paidAt,
+    reference: invoice.paymentReference,
+  });
 
   const cfg = STATUS_CONFIG[status];
   const invoiceNumber = `FAC-${invoice.id.substring(0, 8).toUpperCase()}`;
@@ -76,15 +98,6 @@ export function InvoiceDetailView({ invoice, tenant }: InvoiceDetailViewProps) {
     else {
       setStatus("sent");
       toast.success("Facture marquée comme envoyée");
-    }
-  }
-
-  async function handleMarkPaid() {
-    const result = await markInvoicePaid(invoice.id);
-    if (result?.error) toast.error(result.error);
-    else {
-      setStatus("paid");
-      toast.success("Facture marquée comme payée");
     }
   }
 
@@ -166,6 +179,29 @@ export function InvoiceDetailView({ invoice, tenant }: InvoiceDetailViewProps) {
               </div>
             </>
           )}
+
+          {status === "paid" && paymentInfo.method && (
+            <>
+              <Separator />
+              <div className="flex items-start gap-3">
+                <CreditCard className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-xs text-muted-foreground">Paiement reçu</p>
+                  <p className="font-medium text-green-700">
+                    {PAYMENT_METHOD_LABELS[paymentInfo.method]}
+                  </p>
+                  {paymentInfo.paidAt && (
+                    <p className="text-sm text-muted-foreground">
+                      {format(new Date(paymentInfo.paidAt), "dd MMMM yyyy", { locale: fr })}
+                    </p>
+                  )}
+                  {paymentInfo.reference && (
+                    <p className="text-sm text-muted-foreground">Réf : {paymentInfo.reference}</p>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
         </CardContent>
       </Card>
 
@@ -203,13 +239,22 @@ export function InvoiceDetailView({ invoice, tenant }: InvoiceDetailViewProps) {
         {status === "sent" && (
           <Button
             className="bg-green-600 hover:bg-green-700 text-white"
-            onClick={handleMarkPaid}
+            onClick={() => setPaymentModalOpen(true)}
           >
             <Check className="h-4 w-4 mr-2" />
-            Marquer comme payée
+            Enregistrer le paiement
           </Button>
         )}
       </div>
+
+      <PaymentModal
+        invoiceId={invoice.id}
+        open={paymentModalOpen}
+        onClose={() => setPaymentModalOpen(false)}
+        onSuccess={() => {
+          setStatus("paid");
+        }}
+      />
     </div>
   );
 }

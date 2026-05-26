@@ -2,6 +2,7 @@ export type Plan = "free" | "pro" | "business";
 export type Role = "admin" | "staff";
 export type AppointmentStatus = "pending" | "confirmed" | "done" | "cancelled";
 export type InvoiceStatus = "draft" | "sent" | "paid";
+export type PaymentMethod = "cash" | "airtel_money" | "moov_money" | "virement" | "cheque";
 
 export interface Tenant {
   id: string;
@@ -81,6 +82,9 @@ export interface Invoice {
   appointmentId: string | null;
   amount: number;
   status: InvoiceStatus;
+  paymentMethod: PaymentMethod | null;
+  paidAt: Date | null;
+  paymentReference: string | null;
   pdfUrl: string | null;
   createdAt: Date;
   updatedAt: Date;

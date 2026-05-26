@@ -15,6 +15,13 @@
       "when": 1779782536524,
       "tag": "0001_silky_ultron",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1779784447597,
+      "tag": "0002_lucky_falcon",
+      "breakpoints": true
     }
   ]
 }

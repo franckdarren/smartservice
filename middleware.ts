@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
-function getSubdomain(hostname: string): string | null {
-  const appDomain = process.env.NEXT_PUBLIC_APP_DOMAIN ?? "smartservice.ga";
+const appDomain = process.env.NEXT_PUBLIC_APP_DOMAIN ?? "smartservice.ga";
 
+function getSubdomain(hostname: string): string | null {
   // Production : *.smartservice.ga
   if (hostname.endsWith(`.${appDomain}`)) {
     return hostname.slice(0, -(appDomain.length + 1));
@@ -16,6 +16,16 @@ function getSubdomain(hostname: string): string | null {
   }
 
   return null;
+}
+
+function isKnownDomain(hostname: string): boolean {
+  const bare = hostname.split(":")[0];
+  return (
+    bare === appDomain ||
+    bare.endsWith(`.${appDomain}`) ||
+    bare === "localhost" ||
+    bare.endsWith(".localhost")
+  );
 }
 
 export async function middleware(request: NextRequest) {
@@ -50,6 +60,13 @@ export async function middleware(request: NextRequest) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  // Domaine personnalisé (plan Business) — hostname non reconnu
+  if (!isKnownDomain(hostname)) {
+    const bare = hostname.split(":")[0];
+    response.headers.set("x-custom-domain", bare);
+    return response;
+  }
 
   const subdomain = getSubdomain(hostname);
 

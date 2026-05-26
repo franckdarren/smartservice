@@ -6,7 +6,7 @@ import { invoices, appointments, customers, services, tenants } from "@/lib/driz
 import { eq, and } from "drizzle-orm";
 import { getCurrentTenant } from "@/server/queries/tenants";
 import { createServiceClient } from "@/lib/supabase/server";
-import { invoiceSchema } from "@/features/invoices/schemas";
+import { invoiceSchema, paymentSchema } from "@/features/invoices/schemas";
 import type { InvoiceStatus } from "@/types";
 
 export async function createInvoice(formData: FormData) {
@@ -90,8 +90,33 @@ export async function updateInvoiceStatus(invoiceId: string, status: InvoiceStat
   return { success: true };
 }
 
-export async function markInvoicePaid(invoiceId: string) {
-  return updateInvoiceStatus(invoiceId, "paid");
+export async function markInvoicePaid(invoiceId: string, formData: FormData) {
+  const tenant = await getCurrentTenant();
+  if (!tenant) return { error: "Non autorisé" };
+
+  const raw = {
+    paymentMethod: formData.get("paymentMethod") as string,
+    paidAt: formData.get("paidAt") as string,
+    paymentReference: (formData.get("paymentReference") as string) || undefined,
+  };
+
+  const parsed = paymentSchema.safeParse(raw);
+  if (!parsed.success) return { error: parsed.error.issues[0].message };
+
+  await db
+    .update(invoices)
+    .set({
+      status: "paid",
+      paymentMethod: parsed.data.paymentMethod as "cash" | "airtel_money" | "moov_money" | "virement" | "cheque",
+      paidAt: new Date(parsed.data.paidAt),
+      paymentReference: parsed.data.paymentReference ?? null,
+      updatedAt: new Date(),
+    })
+    .where(and(eq(invoices.id, invoiceId), eq(invoices.tenantId, tenant.id)));
+
+  revalidatePath("/dashboard/factures");
+  revalidatePath(`/dashboard/factures/${invoiceId}`);
+  return { success: true };
 }
 
 export async function markInvoiceSent(invoiceId: string) {

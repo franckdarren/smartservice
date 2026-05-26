@@ -10,14 +10,26 @@ import { Search, FileText, Download, Check, Send } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { cn } from "@/lib/utils";
-import { markInvoicePaid, markInvoiceSent } from "@/server/actions/invoices";
+import { markInvoiceSent } from "@/server/actions/invoices";
 import { toast } from "sonner";
-import type { InvoiceStatus } from "@/types";
+import { PaymentModal } from "@/features/invoices/payment-modal";
+import type { InvoiceStatus, PaymentMethod } from "@/types";
+
+const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
+  cash: "Espèces",
+  airtel_money: "Airtel Money",
+  moov_money: "Moov Money",
+  virement: "Virement",
+  cheque: "Chèque",
+};
 
 interface InvoiceRow {
   id: string;
   amount: number;
   status: InvoiceStatus;
+  paymentMethod: PaymentMethod | null;
+  paidAt: Date | null;
+  paymentReference: string | null;
   pdfUrl: string | null;
   createdAt: Date;
   customerName: string | null;
@@ -39,6 +51,7 @@ interface InvoicesViewProps {
 export function InvoicesView({ invoices }: InvoicesViewProps) {
   const [search, setSearch] = useState("");
   const [loadingId, setLoadingId] = useState<string | null>(null);
+  const [paymentModalId, setPaymentModalId] = useState<string | null>(null);
 
   const filtered = invoices.filter((inv) => {
     const q = search.toLowerCase();
@@ -55,15 +68,6 @@ export function InvoicesView({ invoices }: InvoicesViewProps) {
     setLoadingId(null);
     if (result?.error) toast.error(result.error);
     else toast.success("Facture marquée comme envoyée");
-  }
-
-  async function handleMarkPaid(e: React.MouseEvent, id: string) {
-    e.preventDefault();
-    setLoadingId(id);
-    const result = await markInvoicePaid(id);
-    setLoadingId(null);
-    if (result?.error) toast.error(result.error);
-    else toast.success("Facture marquée comme payée");
   }
 
   return (
@@ -117,6 +121,13 @@ export function InvoicesView({ invoices }: InvoicesViewProps) {
                           {invoice.serviceName ?? "Prestation"} ·{" "}
                           {format(new Date(invoice.createdAt), "dd/MM/yyyy", { locale: fr })}
                         </p>
+                        {invoice.status === "paid" && invoice.paymentMethod && (
+                          <p className="text-xs text-green-600 mt-0.5">
+                            {PAYMENT_METHOD_LABELS[invoice.paymentMethod]}
+                            {invoice.paidAt &&
+                              ` · ${format(new Date(invoice.paidAt), "dd/MM/yyyy", { locale: fr })}`}
+                          </p>
+                        )}
                       </div>
 
                       <div className="flex items-center gap-2 shrink-0">
@@ -139,7 +150,10 @@ export function InvoicesView({ invoices }: InvoicesViewProps) {
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={(e) => handleMarkPaid(e, invoice.id)}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              setPaymentModalId(invoice.id);
+                            }}
                             disabled={loadingId === invoice.id}
                             className="text-green-600 border-green-200 hover:bg-green-50"
                           >
@@ -167,6 +181,14 @@ export function InvoicesView({ invoices }: InvoicesViewProps) {
             );
           })}
         </div>
+      )}
+
+      {paymentModalId && (
+        <PaymentModal
+          invoiceId={paymentModalId}
+          open={true}
+          onClose={() => setPaymentModalId(null)}
+        />
       )}
     </div>
   );

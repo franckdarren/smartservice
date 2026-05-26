@@ -22,6 +22,13 @@ export const invoiceStatusEnum = pgEnum("invoice_status", [
   "sent",
   "paid",
 ]);
+export const paymentMethodEnum = pgEnum("payment_method", [
+  "cash",
+  "airtel_money",
+  "moov_money",
+  "virement",
+  "cheque",
+]);
 
 export const tenants = pgTable("tenants", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -123,6 +130,9 @@ export const invoices = pgTable("invoices", {
   }),
   amount: integer("amount").notNull(), // en FCFA
   status: invoiceStatusEnum("status").notNull().default("draft"),
+  paymentMethod: paymentMethodEnum("payment_method"),
+  paidAt: timestamp("paid_at"),
+  paymentReference: text("payment_reference"),
   pdfUrl: text("pdf_url"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),

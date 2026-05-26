@@ -39,6 +39,16 @@ export async function getTenantBySlug(slug: string) {
   return tenant ?? null;
 }
 
+export async function getTenantByCustomDomain(domain: string) {
+  const [tenant] = await db
+    .select()
+    .from(tenants)
+    .where(eq(tenants.customDomain, domain))
+    .limit(1);
+
+  return tenant ?? null;
+}
+
 export async function getCurrentUser() {
   const supabase = await createClient();
   const {
