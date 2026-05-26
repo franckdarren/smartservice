@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
-import { MapPin, Phone, Clock, Star } from "lucide-react";
+import { Phone, Clock, Star } from "lucide-react";
 import { getTenantBySlug } from "@/server/queries/tenants";
 import { getServices } from "@/server/queries/services";
+import { getReviewsByTenant, getReviewStatsByTenant } from "@/server/queries/reviews";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { BookingForm } from "@/features/bookings/booking-form";
@@ -33,7 +34,11 @@ export default async function TenantPage({
 
   if (!tenant) notFound();
 
-  const servicesList = await getServices(tenant.id);
+  const [servicesList, reviewsList, reviewStats] = await Promise.all([
+    getServices(tenant.id),
+    getReviewsByTenant(tenant.id),
+    getReviewStatsByTenant(tenant.id),
+  ]);
 
   const planBadge = {
     free: null,
@@ -71,10 +76,28 @@ export default async function TenantPage({
             )}
           </div>
 
+          {reviewStats.total > 0 && (
+            <div className="flex items-center justify-center gap-1.5 mt-2 mb-1">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Star
+                  key={i}
+                  className={`h-4 w-4 ${
+                    i < Math.round(reviewStats.average)
+                      ? "fill-yellow-400 text-yellow-400"
+                      : "text-sidebar-foreground/30"
+                  }`}
+                />
+              ))}
+              <span className="text-sm text-sidebar-foreground/80 ml-1">
+                {reviewStats.average}/5 ({reviewStats.total} avis)
+              </span>
+            </div>
+          )}
+
           {tenant.whatsappNumber && (
             <a
               href={`https://wa.me/${tenant.whatsappNumber.replace(/\D/g, "")}`}
-              className="inline-flex items-center gap-2 text-sidebar-foreground/80 hover:text-sidebar-foreground text-sm transition-colors"
+              className="inline-flex items-center gap-2 text-sidebar-foreground/80 hover:text-sidebar-foreground text-sm transition-colors mt-2"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -111,6 +134,61 @@ export default async function TenantPage({
                           <Clock className="h-3 w-3" />
                           {service.durationMinutes} min
                         </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Avis clients */}
+        {reviewsList.length > 0 && (
+          <section>
+            <div className="flex items-center gap-2 mb-4">
+              <h2 className="text-xl font-semibold">Avis clients</h2>
+              <div className="flex items-center gap-1">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Star
+                    key={i}
+                    className={`h-4 w-4 ${
+                      i < Math.round(reviewStats.average)
+                        ? "fill-yellow-400 text-yellow-400"
+                        : "text-muted-foreground/30"
+                    }`}
+                  />
+                ))}
+                <span className="text-sm text-muted-foreground ml-1">
+                  {reviewStats.average}/5
+                </span>
+              </div>
+            </div>
+            <div className="space-y-3">
+              {reviewsList.slice(0, 6).map((review) => (
+                <Card key={review.id}>
+                  <CardContent className="pt-4 pb-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="font-medium text-sm">{review.customerName ?? "Client anonyme"}</p>
+                        {review.comment && (
+                          <p className="text-sm text-muted-foreground mt-1">{review.comment}</p>
+                        )}
+                        {review.serviceName && (
+                          <p className="text-xs text-muted-foreground mt-1">{review.serviceName}</p>
+                        )}
+                      </div>
+                      <div className="flex gap-0.5 shrink-0">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <Star
+                            key={i}
+                            className={`h-3.5 w-3.5 ${
+                              i < review.rating
+                                ? "fill-yellow-400 text-yellow-400"
+                                : "text-muted-foreground/30"
+                            }`}
+                          />
+                        ))}
                       </div>
                     </div>
                   </CardContent>

@@ -2,9 +2,10 @@
 
 import { redirect } from "next/navigation";
 import { db } from "@/lib/drizzle";
-import { customers, appointments, tenants } from "@/lib/drizzle/schema";
+import { customers, appointments, services, tenants } from "@/lib/drizzle/schema";
 import { eq } from "drizzle-orm";
 import { publicBookingSchema } from "@/features/bookings/schemas";
+import { notifyNewBooking, sendBookingConfirmation } from "@/lib/whatsapp";
 
 export async function createPublicBooking(slug: string, formData: FormData) {
   const [tenant] = await db
@@ -66,6 +67,25 @@ export async function createPublicBooking(slug: string, formData: FormData) {
     isUrgent: false,
     notes: parsed.data.message || null,
   });
+
+  // Notifications WhatsApp asynchrones (sans bloquer la redirection)
+  let serviceName = "Prestation";
+  if (parsed.data.serviceId) {
+    const [svc] = await db
+      .select({ name: services.name })
+      .from(services)
+      .where(eq(services.id, parsed.data.serviceId))
+      .limit(1);
+    if (svc) serviceName = svc.name;
+  }
+
+  if (tenant.whatsappNumber) {
+    notifyNewBooking(tenant.whatsappNumber, tenant.name, parsed.data.fullName, serviceName, scheduledAt).catch(() => null);
+  }
+
+  if (parsed.data.phone) {
+    sendBookingConfirmation(parsed.data.phone, tenant.name, serviceName, scheduledAt).catch(() => null);
+  }
 
   redirect(`/${slug}/confirmation`);
 }

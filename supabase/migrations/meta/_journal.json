@@ -8,6 +8,13 @@
       "when": 1779778980123,
       "tag": "0000_magenta_purifiers",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1779782536524,
+      "tag": "0001_silky_ultron",
+      "breakpoints": true
     }
   ]
 }

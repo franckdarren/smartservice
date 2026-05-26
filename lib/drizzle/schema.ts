@@ -87,6 +87,7 @@ export const appointments = pgTable("appointments", {
   status: appointmentStatusEnum("status").notNull().default("pending"),
   isUrgent: boolean("is_urgent").notNull().default(false),
   notes: text("notes"),
+  reviewToken: uuid("review_token").unique(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -149,6 +150,9 @@ export const tenantsRelations = relations(tenants, ({ many }) => ({
   customers: many(customers),
   services: many(services),
   appointments: many(appointments),
+  interventions: many(interventions),
+  invoices: many(invoices),
+  reviews: many(reviews),
 }));
 
 export const customersRelations = relations(customers, ({ one, many }) => ({
@@ -163,8 +167,28 @@ export const servicesRelations = relations(services, ({ one, many }) => ({
   appointments: many(appointments),
 }));
 
-export const appointmentsRelations = relations(appointments, ({ one }) => ({
+export const appointmentsRelations = relations(appointments, ({ one, many }) => ({
   tenant: one(tenants, { fields: [appointments.tenantId], references: [tenants.id] }),
   customer: one(customers, { fields: [appointments.customerId], references: [customers.id] }),
   service: one(services, { fields: [appointments.serviceId], references: [services.id] }),
+  intervention: many(interventions),
+  invoice: many(invoices),
+}));
+
+export const interventionsRelations = relations(interventions, ({ one }) => ({
+  tenant: one(tenants, { fields: [interventions.tenantId], references: [tenants.id] }),
+  appointment: one(appointments, { fields: [interventions.appointmentId], references: [appointments.id] }),
+  technician: one(users, { fields: [interventions.technicianId], references: [users.id] }),
+}));
+
+export const invoicesRelations = relations(invoices, ({ one }) => ({
+  tenant: one(tenants, { fields: [invoices.tenantId], references: [tenants.id] }),
+  customer: one(customers, { fields: [invoices.customerId], references: [customers.id] }),
+  appointment: one(appointments, { fields: [invoices.appointmentId], references: [appointments.id] }),
+}));
+
+export const reviewsRelations = relations(reviews, ({ one }) => ({
+  tenant: one(tenants, { fields: [reviews.tenantId], references: [tenants.id] }),
+  customer: one(customers, { fields: [reviews.customerId], references: [customers.id] }),
+  appointment: one(appointments, { fields: [reviews.appointmentId], references: [appointments.id] }),
 }));

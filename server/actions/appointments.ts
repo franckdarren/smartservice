@@ -6,6 +6,8 @@ import { appointments } from "@/lib/drizzle/schema";
 import { eq, and } from "drizzle-orm";
 import { getCurrentTenant } from "@/server/queries/tenants";
 import { appointmentSchema } from "@/features/appointments/schemas";
+import { createInvoiceFromAppointment } from "@/server/actions/invoices";
+import { sendWhatsAppNotification } from "@/lib/whatsapp";
 import type { AppointmentStatus } from "@/types";
 
 export async function createAppointment(formData: FormData) {
@@ -80,12 +82,38 @@ export async function updateAppointmentStatus(
   const tenant = await getCurrentTenant();
   if (!tenant) return { error: "Non autorisé" };
 
+  const updateData: Record<string, unknown> = { status, updatedAt: new Date() };
+
+  if (status === "done") {
+    const { randomUUID } = await import("crypto");
+    updateData.reviewToken = randomUUID();
+  }
+
   await db
     .update(appointments)
-    .set({ status, updatedAt: new Date() })
+    .set(updateData)
     .where(and(eq(appointments.id, appointmentId), eq(appointments.tenantId, tenant.id)));
 
+  if (status === "done") {
+    await createInvoiceFromAppointment(tenant.id, appointmentId);
+
+    const [appt] = await db
+      .select({ reviewToken: appointments.reviewToken })
+      .from(appointments)
+      .where(eq(appointments.id, appointmentId))
+      .limit(1);
+
+    if (appt?.reviewToken && tenant.whatsappNumber) {
+      const reviewUrl = `${process.env.NEXT_PUBLIC_APP_URL?.replace("app.", "")}/avis/${appt.reviewToken}`;
+      await sendWhatsAppNotification(
+        tenant.whatsappNumber,
+        `Bonjour ! Merci d'avoir fait appel à ${tenant.name}. Donnez votre avis ici : ${reviewUrl}`
+      ).catch(() => null);
+    }
+  }
+
   revalidatePath("/dashboard/rendez-vous");
+  revalidatePath("/dashboard/factures");
   return { success: true };
 }
 

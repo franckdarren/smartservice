@@ -55,10 +55,23 @@ export interface Appointment {
   status: AppointmentStatus;
   isUrgent: boolean;
   notes: string | null;
+  reviewToken: string | null;
   createdAt: Date;
   updatedAt: Date;
   customer?: Customer;
   service?: Service | null;
+}
+
+export interface Intervention {
+  id: string;
+  tenantId: string;
+  appointmentId: string;
+  technicianId: string | null;
+  notes: string | null;
+  photosBefore: string[] | null;
+  photosAfter: string[] | null;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface Invoice {

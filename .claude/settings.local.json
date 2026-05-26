@@ -3,7 +3,10 @@
     "allow": [
       "Bash(mkdir -p \"c:\\\\Users\\\\HP USERS\\\\Downloads\\\\smartservice\\\\.claude\")",
       "PowerShell(Get-ChildItem -Path \"c:\\\\Users\\\\HP USERS\\\\Downloads\\\\smartservice\\\\lib\" -Recurse -Force | Select-Object FullName, @{Name=\"Type\";Expression={if\\($_.PSIsContainer\\){\"Dir\"}else{\"File\"}}} | Format-Table @{Name=\"Path\";Expression={$_.FullName.Replace\\(\"c:\\\\Users\\\\HP USERS\\\\Downloads\\\\smartservice\\\\\", \"\"\\)}}, Type -AutoSize)",
-      "Bash(npx shadcn *)"
+      "Bash(npx shadcn *)",
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\HP USERS\\\\Downloads\\\\smartservice\" -Recurse -Directory)",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(Sort-Object)"
     ],
     "additionalDirectories": [
       "c:\\Users\\HP USERS\\Downloads\\smartservice"
