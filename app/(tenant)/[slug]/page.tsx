@@ -49,9 +49,9 @@ export default async function TenantPage({
   return (
     <div className="min-h-screen bg-background">
       {/* Hero */}
-      <section className="bg-sidebar text-sidebar-foreground py-16 px-4">
+      <section className="bg-sidebar text-sidebar-foreground py-10 sm:py-16 px-4">
         <div className="max-w-3xl mx-auto text-center">
-          <div className="w-20 h-20 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-6">
+          <div className="w-16 h-16 sm:w-20 sm:h-20 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6">
             {tenant.logoUrl ? (
               <img
                 src={tenant.logoUrl}
@@ -59,14 +59,14 @@ export default async function TenantPage({
                 className="w-full h-full object-cover rounded-2xl"
               />
             ) : (
-              <span className="text-white font-bold text-3xl">
+              <span className="text-white font-bold text-2xl sm:text-3xl">
                 {tenant.name[0].toUpperCase()}
               </span>
             )}
           </div>
 
-          <div className="flex items-center justify-center gap-2 mb-3">
-            <h1 className="text-3xl font-bold">{tenant.name}</h1>
+          <div className="flex flex-wrap items-center justify-center gap-2 mb-3">
+            <h1 className="text-2xl sm:text-3xl font-bold wrap-break-word">{tenant.name}</h1>
             {planBadge && (
               <span
                 className={`text-xs px-2 py-0.5 rounded-full text-white font-medium ${planBadge.color}`}
@@ -77,18 +77,20 @@ export default async function TenantPage({
           </div>
 
           {reviewStats.total > 0 && (
-            <div className="flex items-center justify-center gap-1.5 mt-2 mb-1">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Star
-                  key={i}
-                  className={`h-4 w-4 ${
-                    i < Math.round(reviewStats.average)
-                      ? "fill-yellow-400 text-yellow-400"
-                      : "text-sidebar-foreground/30"
-                  }`}
-                />
-              ))}
-              <span className="text-sm text-sidebar-foreground/80 ml-1">
+            <div className="flex flex-wrap items-center justify-center gap-x-1.5 gap-y-1 mt-2 mb-1">
+              <div className="flex items-center gap-0.5">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Star
+                    key={i}
+                    className={`h-4 w-4 ${
+                      i < Math.round(reviewStats.average)
+                        ? "fill-yellow-400 text-yellow-400"
+                        : "text-sidebar-foreground/30"
+                    }`}
+                  />
+                ))}
+              </div>
+              <span className="text-sm text-sidebar-foreground/80">
                 {reviewStats.average}/5 ({reviewStats.total} avis)
               </span>
             </div>
@@ -97,29 +99,29 @@ export default async function TenantPage({
           {tenant.whatsappNumber && (
             <a
               href={`https://wa.me/${tenant.whatsappNumber.replace(/\D/g, "")}`}
-              className="inline-flex items-center gap-2 text-sidebar-foreground/80 hover:text-sidebar-foreground text-sm transition-colors mt-2"
+              className="inline-flex items-center gap-2 text-sidebar-foreground/80 hover:text-sidebar-foreground text-sm transition-colors mt-2 break-all"
               target="_blank"
               rel="noopener noreferrer"
             >
-              <Phone className="h-4 w-4" />
+              <Phone className="h-4 w-4 shrink-0" />
               {tenant.whatsappNumber}
             </a>
           )}
         </div>
       </section>
 
-      <div className="max-w-3xl mx-auto px-4 py-10 space-y-10">
+      <div className="max-w-3xl mx-auto px-4 py-8 sm:py-10 space-y-8 sm:space-y-10">
         {/* Services */}
         {servicesList.length > 0 && (
           <section>
-            <h2 className="text-xl font-semibold mb-4">Nos services</h2>
+            <h2 className="text-lg sm:text-xl font-semibold mb-4">Nos services</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {servicesList.map((service) => (
                 <Card key={service.id}>
                   <CardContent className="pt-4 pb-4">
-                    <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <p className="font-medium">{service.name}</p>
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <p className="font-medium wrap-break-word">{service.name}</p>
                         {service.description && (
                           <p className="text-sm text-muted-foreground mt-0.5 line-clamp-2">
                             {service.description}
@@ -127,7 +129,7 @@ export default async function TenantPage({
                         )}
                       </div>
                       <div className="text-right shrink-0">
-                        <p className="font-semibold text-primary">
+                        <p className="font-semibold text-primary text-sm sm:text-base whitespace-nowrap">
                           {new Intl.NumberFormat("fr-FR").format(service.price)} FCFA
                         </p>
                         <p className="text-xs text-muted-foreground flex items-center gap-1 justify-end">
@@ -146,8 +148,8 @@ export default async function TenantPage({
         {/* Avis clients */}
         {reviewsList.length > 0 && (
           <section>
-            <div className="flex items-center gap-2 mb-4">
-              <h2 className="text-xl font-semibold">Avis clients</h2>
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-4">
+              <h2 className="text-lg sm:text-xl font-semibold">Avis clients</h2>
               <div className="flex items-center gap-1">
                 {Array.from({ length: 5 }).map((_, i) => (
                   <Star
@@ -169,13 +171,13 @@ export default async function TenantPage({
                 <Card key={review.id}>
                   <CardContent className="pt-4 pb-4">
                     <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <p className="font-medium text-sm">{review.customerName ?? "Client anonyme"}</p>
+                      <div className="min-w-0 flex-1">
+                        <p className="font-medium text-sm wrap-break-word">{review.customerName ?? "Client anonyme"}</p>
                         {review.comment && (
-                          <p className="text-sm text-muted-foreground mt-1">{review.comment}</p>
+                          <p className="text-sm text-muted-foreground mt-1 wrap-break-word">{review.comment}</p>
                         )}
                         {review.serviceName && (
-                          <p className="text-xs text-muted-foreground mt-1">{review.serviceName}</p>
+                          <p className="text-xs text-muted-foreground mt-1 wrap-break-word">{review.serviceName}</p>
                         )}
                       </div>
                       <div className="flex gap-0.5 shrink-0">
