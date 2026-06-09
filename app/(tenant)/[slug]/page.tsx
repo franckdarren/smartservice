@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { BookingForm } from "@/features/bookings/booking-form";
 
 export const revalidate = 3600;
+export const maxDuration = 30;
 
 export async function generateMetadata({
   params,

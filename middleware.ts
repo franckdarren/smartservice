@@ -32,6 +32,25 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const hostname = request.headers.get("host") ?? "";
 
+  // Domaine personnalisé (plan Business) — hostname non reconnu
+  if (!isKnownDomain(hostname)) {
+    const response = NextResponse.next({ request });
+    const bare = hostname.split(":")[0];
+    response.headers.set("x-custom-domain", bare);
+    return response;
+  }
+
+  const subdomain = getSubdomain(hostname);
+  const isDashboard = subdomain === "app" || (!subdomain && hostname.includes("localhost"));
+
+  // Landing pages publiques (tenant) : on évite l'appel Supabase Auth pour réduire la latence.
+  if (!isDashboard) {
+    const response = NextResponse.next({ request });
+    if (subdomain) response.headers.set("x-tenant-slug", subdomain);
+    return response;
+  }
+
+  // À partir d'ici : route dashboard → vérification d'auth nécessaire
   let response = NextResponse.next({
     request: { headers: new Headers(request.headers) },
   });
@@ -61,34 +80,20 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Domaine personnalisé (plan Business) — hostname non reconnu
-  if (!isKnownDomain(hostname)) {
-    const bare = hostname.split(":")[0];
-    response.headers.set("x-custom-domain", bare);
-    return response;
-  }
-
-  const subdomain = getSubdomain(hostname);
-
   if (subdomain) {
     response.headers.set("x-tenant-slug", subdomain);
   }
 
-  // Routes dashboard (subdomain "app" ou localhost sans subdomain en dev)
-  const isDashboard = subdomain === "app" || (!subdomain && hostname.includes("localhost"));
+  const isAuthRoute = pathname === "/login" || pathname === "/register";
 
-  if (isDashboard) {
-    const isAuthRoute = pathname === "/login" || pathname === "/register";
+  if (!user && !isAuthRoute) {
+    const loginUrl = new URL("/login", request.url);
+    return NextResponse.redirect(loginUrl);
+  }
 
-    if (!user && !isAuthRoute) {
-      const loginUrl = new URL("/login", request.url);
-      return NextResponse.redirect(loginUrl);
-    }
-
-    if (user && isAuthRoute) {
-      const dashboardUrl = new URL("/dashboard", request.url);
-      return NextResponse.redirect(dashboardUrl);
-    }
+  if (user && isAuthRoute) {
+    const dashboardUrl = new URL("/dashboard", request.url);
+    return NextResponse.redirect(dashboardUrl);
   }
 
   return response;
