@@ -8,7 +8,8 @@
       "Bash(Select-Object -ExpandProperty FullName)",
       "Bash(Sort-Object)",
       "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\HP USERS\\\\Downloads\\\\smartservice\" -Force)",
-      "Bash(Select-Object Name, Mode)"
+      "Bash(Select-Object Name, Mode)",
+      "Bash(npm run *)"
     ],
     "additionalDirectories": [
       "c:\\Users\\HP USERS\\Downloads\\smartservice"

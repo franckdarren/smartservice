@@ -30,19 +30,23 @@ const bottomNavItems = [
   { href: "/dashboard/parametres", label: "Paramètres", icon: Settings },
 ];
 
-export function SidebarNav() {
+interface SidebarNavProps {
+  onClose?: () => void;
+}
+
+export function SidebarNav({ onClose }: SidebarNavProps) {
   const pathname = usePathname();
 
   return (
-    <aside className="flex flex-col w-64 min-h-screen bg-sidebar text-sidebar-foreground shrink-0">
-      <div className="flex items-center gap-3 px-6 py-5 border-b border-sidebar-border">
+    <aside className="flex flex-col w-64 h-full bg-sidebar text-sidebar-foreground">
+      <div className="flex items-center gap-3 px-6 py-5 border-b border-sidebar-border shrink-0">
         <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shrink-0">
           <span className="text-white font-bold text-sm">S</span>
         </div>
         <span className="font-semibold text-sidebar-foreground">SmartService</span>
       </div>
 
-      <nav className="flex-1 px-3 py-4 space-y-1">
+      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
         {navItems.map((item) => {
           const isActive =
             item.href === "/dashboard"
@@ -53,6 +57,7 @@ export function SidebarNav() {
             <Link
               key={item.href}
               href={item.href}
+              onClick={onClose}
               className={cn(
                 "flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors",
                 isActive
@@ -67,13 +72,14 @@ export function SidebarNav() {
         })}
       </nav>
 
-      <div className="px-3 py-4 border-t border-sidebar-border space-y-1">
+      <div className="px-3 py-4 border-t border-sidebar-border space-y-1 shrink-0">
         {bottomNavItems.map((item) => {
           const isActive = pathname.startsWith(item.href);
           return (
             <Link
               key={item.href}
               href={item.href}
+              onClick={onClose}
               className={cn(
                 "flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors",
                 isActive

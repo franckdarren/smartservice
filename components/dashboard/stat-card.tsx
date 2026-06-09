@@ -17,7 +17,7 @@ export function StatCard({ title, value, subtitle, icon: Icon, iconColor }: Stat
         <div className="flex items-start justify-between">
           <div>
             <p className="text-sm font-medium text-muted-foreground">{title}</p>
-            <p className="text-3xl font-bold mt-1">{value}</p>
+            <p className="text-2xl sm:text-3xl font-bold mt-1">{value}</p>
             {subtitle && (
               <p className="text-xs text-muted-foreground mt-1">{subtitle}</p>
             )}
