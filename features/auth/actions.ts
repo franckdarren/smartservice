@@ -24,19 +24,23 @@ export async function registerTenant(formData: FormData) {
   const { fullName, email, password, companyName, slug } = parsed.data;
 
   // Vérifier que le slug est disponible
-  const existing = await db
-    .select({ id: tenants.id })
-    .from(tenants)
-    .where(eq(tenants.slug, slug))
-    .limit(1);
+  try {
+    const existing = await db
+      .select({ id: tenants.id })
+      .from(tenants)
+      .where(eq(tenants.slug, slug))
+      .limit(1);
 
-  if (existing.length > 0) {
-    return { error: "Ce slug est déjà pris. Choisissez-en un autre." };
+    if (existing.length > 0) {
+      return { error: "Ce slug est déjà pris. Choisissez-en un autre." };
+    }
+  } catch {
+    return { error: "Impossible de contacter la base de données. Vérifiez votre connexion." };
   }
 
   // Créer l'utilisateur Supabase Auth
-  const supabase = await createServiceClient();
-  const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+  const adminSupabase = createServiceClient();
+  const { data: authData, error: authError } = await adminSupabase.auth.admin.createUser({
     email,
     password,
     email_confirm: true,
@@ -47,22 +51,32 @@ export async function registerTenant(formData: FormData) {
   }
 
   // Créer le tenant et l'utilisateur en DB
-  const [tenant] = await db
-    .insert(tenants)
-    .values({ name: companyName, slug })
-    .returning();
+  try {
+    const [tenant] = await db
+      .insert(tenants)
+      .values({ name: companyName, slug })
+      .returning();
 
-  await db.insert(users).values({
-    id: authData.user.id,
-    tenantId: tenant.id,
-    email,
-    fullName,
-    role: "admin",
-  });
+    await db.insert(users).values({
+      id: authData.user.id,
+      tenantId: tenant.id,
+      email,
+      fullName,
+      role: "admin",
+    });
+  } catch (dbError) {
+    // Nettoyer l'utilisateur Auth créé pour éviter les orphelins
+    await adminSupabase.auth.admin.deleteUser(authData.user.id);
+    return { error: "Erreur lors de la création du compte en base de données." };
+  }
 
   // Connecter l'utilisateur
-  const browserSupabase = await createClient();
-  await browserSupabase.auth.signInWithPassword({ email, password });
+  const supabase = await createClient();
+  const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+
+  if (signInError) {
+    return { error: "Compte créé mais connexion impossible. Essayez de vous connecter manuellement." };
+  }
 
   redirect("/dashboard");
 }

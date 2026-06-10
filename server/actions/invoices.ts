@@ -164,7 +164,7 @@ export async function generateInvoicePdf(invoiceId: string) {
   }) as any;
   const buffer = await renderToBuffer(element);
 
-  const supabase = await createServiceClient();
+  const supabase = createServiceClient();
   const path = `invoices/${tenant.id}/${invoiceId}.pdf`;
 
   const { error: uploadError } = await supabase.storage

@@ -75,7 +75,7 @@ export async function uploadInterventionPhoto(
   if (!file.type.startsWith("image/")) return { error: "Le fichier doit être une image" };
   if (file.size > 5 * 1024 * 1024) return { error: "L'image ne doit pas dépasser 5 Mo" };
 
-  const supabase = await createServiceClient();
+  const supabase = createServiceClient();
 
   const ext = file.name.split(".").pop() ?? "jpg";
   const path = `interventions/${tenant.id}/${interventionId}/${phase}/${Date.now()}.${ext}`;
