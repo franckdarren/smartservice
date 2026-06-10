@@ -7,7 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Save, Globe, Info } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Loader2, Save, Globe, Info, Sparkles } from "lucide-react";
 import { updateTenantSettings } from "@/server/actions/settings";
 import { toast } from "sonner";
 import type { Tenant } from "@/types";
@@ -90,6 +91,74 @@ export function SettingsForm({ tenant }: SettingsFormProps) {
               defaultValue={tenant.whatsappNumber ?? ""}
               placeholder="+241 77 00 00 00"
             />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Vitrine publique */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-primary shrink-0" />
+              <span>Vitrine publique</span>
+            </div>
+          </CardTitle>
+          <p className="text-xs text-muted-foreground mt-1">
+            Ces informations sont affichées sur votre landing page publique.
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="tagline">Accroche</Label>
+            <Input
+              id="tagline"
+              name="tagline"
+              defaultValue={tenant.tagline ?? ""}
+              placeholder="Ex : Plombier professionnel à Libreville depuis 10 ans"
+              maxLength={120}
+            />
+            <p className="text-xs text-muted-foreground">
+              Une phrase courte qui décrit votre activité (120 caractères max).
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="bio">Présentation</Label>
+            <Textarea
+              id="bio"
+              name="bio"
+              defaultValue={tenant.bio ?? ""}
+              placeholder="Présentez votre entreprise, votre équipe, vos valeurs..."
+              rows={4}
+              maxLength={800}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="serviceArea">Zone d'intervention</Label>
+            <Input
+              id="serviceArea"
+              name="serviceArea"
+              defaultValue={tenant.serviceArea ?? ""}
+              placeholder="Ex : Libreville, Akanda, Owendo"
+              maxLength={200}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="businessHours">Horaires</Label>
+            <Textarea
+              id="businessHours"
+              name="businessHours"
+              defaultValue={tenant.businessHours ?? ""}
+              placeholder={"Lun - Ven : 8h - 18h\nSam : 9h - 13h\nDim : fermé"}
+              rows={3}
+              maxLength={500}
+            />
+            <p className="text-xs text-muted-foreground">
+              Une ligne par jour ou plage horaire.
+            </p>
           </div>
         </CardContent>
       </Card>

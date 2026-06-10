@@ -11,7 +11,12 @@ export interface Tenant {
   customDomain: string | null;
   plan: Plan;
   logoUrl: string | null;
+  coverUrl: string | null;
   whatsappNumber: string | null;
+  tagline: string | null;
+  bio: string | null;
+  serviceArea: string | null;
+  businessHours: string | null;
   createdAt: Date;
   updatedAt: Date;
 }

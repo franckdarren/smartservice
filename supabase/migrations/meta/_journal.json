@@ -29,6 +29,13 @@
       "when": 1779784447598,
       "tag": "0003_service_flexible_fields",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1779784447599,
+      "tag": "0004_tenant_landing_fields",
+      "breakpoints": true
     }
   ]
 }

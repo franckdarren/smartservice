@@ -37,7 +37,12 @@ export const tenants = pgTable("tenants", {
   customDomain: text("custom_domain"),
   plan: planEnum("plan").notNull().default("free"),
   logoUrl: text("logo_url"),
+  coverUrl: text("cover_url"),
   whatsappNumber: text("whatsapp_number"),
+  tagline: text("tagline"),
+  bio: text("bio"),
+  serviceArea: text("service_area"),
+  businessHours: text("business_hours"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

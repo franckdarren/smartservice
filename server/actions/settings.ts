@@ -19,6 +19,10 @@ const settingsSchema = z.object({
     .regex(/^[a-z0-9.-]+\.[a-z]{2,}$/, "Domaine invalide (ex: maboutique.com)")
     .optional()
     .or(z.literal("")),
+  tagline: z.string().max(120, "120 caractères max").optional().or(z.literal("")),
+  bio: z.string().max(800, "800 caractères max").optional().or(z.literal("")),
+  serviceArea: z.string().max(200, "200 caractères max").optional().or(z.literal("")),
+  businessHours: z.string().max(500, "500 caractères max").optional().or(z.literal("")),
 });
 
 export async function updateTenantSettings(formData: FormData) {
@@ -29,6 +33,10 @@ export async function updateTenantSettings(formData: FormData) {
     name: formData.get("name") as string,
     whatsappNumber: (formData.get("whatsappNumber") as string) || undefined,
     customDomain: (formData.get("customDomain") as string) || undefined,
+    tagline: (formData.get("tagline") as string) || undefined,
+    bio: (formData.get("bio") as string) || undefined,
+    serviceArea: (formData.get("serviceArea") as string) || undefined,
+    businessHours: (formData.get("businessHours") as string) || undefined,
   };
 
   const parsed = settingsSchema.safeParse(raw);
@@ -40,10 +48,15 @@ export async function updateTenantSettings(formData: FormData) {
       name: parsed.data.name,
       whatsappNumber: parsed.data.whatsappNumber || null,
       customDomain: parsed.data.customDomain || null,
+      tagline: parsed.data.tagline || null,
+      bio: parsed.data.bio || null,
+      serviceArea: parsed.data.serviceArea || null,
+      businessHours: parsed.data.businessHours || null,
       updatedAt: new Date(),
     })
     .where(eq(tenants.id, tenant.id));
 
   revalidatePath("/dashboard/parametres");
+  revalidatePath(`/${tenant.slug}`);
   return { success: true };
 }
