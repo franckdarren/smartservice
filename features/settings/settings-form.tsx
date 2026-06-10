@@ -37,11 +37,11 @@ export function SettingsForm({ tenant }: SettingsFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-2xl space-y-6">
+    <form onSubmit={handleSubmit} className="w-full max-w-2xl space-y-6">
       {/* Informations générales */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-start justify-between gap-2">
             <CardTitle className="text-base">Informations générales</CardTitle>
             <Badge className={planCfg.class} variant="outline">
               Plan {planCfg.label}
@@ -69,11 +69,16 @@ export function SettingsForm({ tenant }: SettingsFormProps) {
               disabled
               className="bg-muted"
             />
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground break-all">
               Votre page publique :{" "}
-              <span className="font-mono text-primary">
-                {tenant.slug}.smartservice.ga
-              </span>
+              <a
+                href={`${process.env.NEXT_PUBLIC_APP_URL}/${tenant.slug}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-mono text-primary hover:underline"
+              >
+                {process.env.NEXT_PUBLIC_APP_URL}/{tenant.slug}
+              </a>
             </p>
           </div>
 
@@ -92,14 +97,16 @@ export function SettingsForm({ tenant }: SettingsFormProps) {
       {/* Domaine personnalisé */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2">
-            <Globe className="h-4 w-4 text-primary" />
-            Domaine personnalisé
-            {tenant.plan !== "business" && (
-              <Badge className="bg-yellow-100 text-yellow-700 text-xs" variant="outline">
-                Plan Business requis
-              </Badge>
-            )}
+          <CardTitle className="text-base">
+            <div className="flex flex-wrap items-center gap-2">
+              <Globe className="h-4 w-4 text-primary shrink-0" />
+              <span>Domaine personnalisé</span>
+              {tenant.plan !== "business" && (
+                <Badge className="bg-yellow-100 text-yellow-700 text-xs" variant="outline">
+                  Plan Business requis
+                </Badge>
+              )}
+            </div>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -126,7 +133,7 @@ export function SettingsForm({ tenant }: SettingsFormProps) {
               <p className="text-xs text-blue-700">
                 Ajoutez un enregistrement CNAME chez votre registrar :
               </p>
-              <div className="font-mono text-xs bg-white rounded border border-blue-200 p-2 space-y-1">
+              <div className="font-mono text-xs bg-white rounded border border-blue-200 p-2 space-y-1 overflow-x-auto">
                 <p>
                   <span className="text-muted-foreground">Type :</span> CNAME
                 </p>

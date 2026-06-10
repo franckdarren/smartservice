@@ -11,11 +11,12 @@ export async function createService(formData: FormData) {
   const tenant = await getCurrentTenant();
   if (!tenant) return { error: "Non autorisé" };
 
+  const priceRaw = formData.get("price");
   const raw = {
     name: formData.get("name") as string,
     description: (formData.get("description") as string) || undefined,
-    price: formData.get("price") as string,
-    durationMinutes: formData.get("durationMinutes") as string,
+    price: priceRaw === "" || priceRaw === null ? null : Number(priceRaw),
+    duration: formData.get("duration") as string,
   };
 
   const parsed = serviceSchema.safeParse(raw);
@@ -25,8 +26,8 @@ export async function createService(formData: FormData) {
     tenantId: tenant.id,
     name: parsed.data.name,
     description: parsed.data.description || null,
-    price: parsed.data.price,
-    durationMinutes: parsed.data.durationMinutes,
+    price: parsed.data.price ?? null,
+    duration: parsed.data.duration,
   });
 
   revalidatePath("/dashboard/services");
@@ -37,11 +38,12 @@ export async function updateService(serviceId: string, formData: FormData) {
   const tenant = await getCurrentTenant();
   if (!tenant) return { error: "Non autorisé" };
 
+  const priceRaw = formData.get("price");
   const raw = {
     name: formData.get("name") as string,
     description: (formData.get("description") as string) || undefined,
-    price: formData.get("price") as string,
-    durationMinutes: formData.get("durationMinutes") as string,
+    price: priceRaw === "" || priceRaw === null ? null : Number(priceRaw),
+    duration: formData.get("duration") as string,
   };
 
   const parsed = serviceSchema.safeParse(raw);
@@ -52,8 +54,8 @@ export async function updateService(serviceId: string, formData: FormData) {
     .set({
       name: parsed.data.name,
       description: parsed.data.description || null,
-      price: parsed.data.price,
-      durationMinutes: parsed.data.durationMinutes,
+      price: parsed.data.price ?? null,
+      duration: parsed.data.duration,
       updatedAt: new Date(),
     })
     .where(and(eq(services.id, serviceId), eq(services.tenantId, tenant.id)));

@@ -41,8 +41,8 @@ export interface Service {
   tenantId: string;
   name: string;
   description: string | null;
-  price: number;
-  durationMinutes: number;
+  price: number | null;
+  duration: string;
   createdAt: Date;
   updatedAt: Date;
 }

@@ -73,8 +73,8 @@ export const services = pgTable("services", {
     .references(() => tenants.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
   description: text("description"),
-  price: integer("price").notNull(), // en FCFA
-  durationMinutes: integer("duration_minutes").notNull(),
+  price: integer("price"), // en FCFA, null = "Sur devis"
+  duration: text("duration").notNull(), // texte libre : "45 min", "2h", "3 mois"
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

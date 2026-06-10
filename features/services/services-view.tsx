@@ -25,15 +25,9 @@ import { ServiceForm } from "./service-form";
 import { createService, updateService, deleteService } from "@/server/actions/services";
 import type { Service } from "@/types";
 
-function formatFCFA(amount: number) {
-  return new Intl.NumberFormat("fr-FR").format(amount) + " FCFA";
-}
-
-function formatDuration(minutes: number) {
-  if (minutes < 60) return `${minutes} min`;
-  const h = Math.floor(minutes / 60);
-  const m = minutes % 60;
-  return m > 0 ? `${h}h${m.toString().padStart(2, "0")}` : `${h}h`;
+function formatPrice(price: number | null) {
+  if (price === null) return "Sur devis";
+  return new Intl.NumberFormat("fr-FR").format(price) + " FCFA";
 }
 
 interface ServicesViewProps {
@@ -100,13 +94,13 @@ export function ServicesView({ services }: ServicesViewProps) {
               </CardHeader>
               <CardContent className="flex-1 pb-3">
                 <div className="flex gap-4 text-sm">
-                  <span className="flex items-center gap-1 font-semibold text-primary">
+                  <span className={`flex items-center gap-1 font-semibold ${service.price === null ? "text-muted-foreground italic" : "text-primary"}`}>
                     <Banknote className="h-4 w-4" />
-                    {formatFCFA(service.price)}
+                    {formatPrice(service.price)}
                   </span>
                   <span className="flex items-center gap-1 text-muted-foreground">
                     <Clock className="h-4 w-4" />
-                    {formatDuration(service.durationMinutes)}
+                    {service.duration}
                   </span>
                 </div>
               </CardContent>

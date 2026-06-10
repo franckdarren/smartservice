@@ -22,6 +22,13 @@
       "when": 1779784447597,
       "tag": "0002_lucky_falcon",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1749600000000,
+      "tag": "0003_service_flexible_fields",
+      "breakpoints": true
     }
   ]
 }

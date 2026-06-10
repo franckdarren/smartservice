@@ -87,7 +87,7 @@ export function BookingForm({ slug, services }: BookingFormProps) {
               <SelectItem value="">Aucun service spécifique</SelectItem>
               {services.map((s) => (
                 <SelectItem key={s.id} value={s.id}>
-                  {s.name} — {new Intl.NumberFormat("fr-FR").format(s.price)} FCFA
+                  {s.name}{s.price !== null ? ` — ${new Intl.NumberFormat("fr-FR").format(s.price)} FCFA` : " — Sur devis"}
                 </SelectItem>
               ))}
             </SelectContent>

@@ -41,7 +41,10 @@ export async function middleware(request: NextRequest) {
   }
 
   const subdomain = getSubdomain(hostname);
-  const isDashboard = subdomain === "app" || (!subdomain && hostname.includes("localhost"));
+  const isDashboard =
+    subdomain === "app" ||
+    (!subdomain && hostname.includes("localhost")) ||
+    (!subdomain && (pathname.startsWith("/dashboard") || pathname === "/login" || pathname === "/register"));
 
   // Landing pages publiques (tenant) : on évite l'appel Supabase Auth pour réduire la latence.
   if (!isDashboard) {

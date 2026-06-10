@@ -130,12 +130,14 @@ export default async function TenantPage({
                         )}
                       </div>
                       <div className="text-right shrink-0">
-                        <p className="font-semibold text-primary text-sm sm:text-base whitespace-nowrap">
-                          {new Intl.NumberFormat("fr-FR").format(service.price)} FCFA
+                        <p className={`font-semibold text-sm sm:text-base whitespace-nowrap ${service.price === null ? "text-muted-foreground italic" : "text-primary"}`}>
+                          {service.price === null
+                            ? "Sur devis"
+                            : `${new Intl.NumberFormat("fr-FR").format(service.price)} FCFA`}
                         </p>
                         <p className="text-xs text-muted-foreground flex items-center gap-1 justify-end">
                           <Clock className="h-3 w-3" />
-                          {service.durationMinutes} min
+                          {service.duration}
                         </p>
                       </div>
                     </div>

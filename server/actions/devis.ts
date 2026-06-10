@@ -41,7 +41,7 @@ export async function generateDevis(formData: FormData) {
   const servicesContext =
     services.length > 0
       ? `Services disponibles dans le catalogue :\n${services
-          .map((s) => `- ${s.name} : ${s.price.toLocaleString("fr-FR")} FCFA (${s.durationMinutes} min)`)
+          .map((s) => `- ${s.name} : ${s.price !== null ? s.price.toLocaleString("fr-FR") + " FCFA" : "Sur devis"} (${s.duration})`)
           .join("\n")}`
       : "Aucun service dans le catalogue pour l'instant.";
 

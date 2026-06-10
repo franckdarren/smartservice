@@ -22,6 +22,7 @@ export function ServiceForm({
   submitLabel = "Enregistrer",
 }: ServiceFormProps) {
   const [serverError, setServerError] = useState<string | null>(null);
+  const [surDevis, setSurDevis] = useState(defaultValues?.price == null && defaultValues !== undefined ? true : false);
 
   const {
     register,
@@ -32,8 +33,8 @@ export function ServiceForm({
     defaultValues: {
       name: defaultValues?.name ?? "",
       description: defaultValues?.description ?? "",
-      price: defaultValues?.price ?? 0,
-      durationMinutes: defaultValues?.durationMinutes ?? 60,
+      price: defaultValues?.price ?? undefined,
+      duration: defaultValues?.duration ?? "",
     },
   });
 
@@ -41,8 +42,12 @@ export function ServiceForm({
     setServerError(null);
     const formData = new FormData();
     formData.set("name", data.name);
-    formData.set("price", String(data.price));
-    formData.set("durationMinutes", String(data.durationMinutes));
+    formData.set("duration", data.duration);
+    if (!surDevis && data.price != null) {
+      formData.set("price", String(data.price));
+    } else {
+      formData.set("price", "");
+    }
     if (data.description) formData.set("description", data.description);
 
     const result = await action(formData);
@@ -71,30 +76,44 @@ export function ServiceForm({
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-1.5">
-          <Label htmlFor="price">Prix (FCFA) *</Label>
+          <Label htmlFor="price">
+            Prix (FCFA) *
+          </Label>
           <Input
             id="price"
             type="number"
             min="0"
             placeholder="15000"
+            disabled={surDevis}
             {...register("price", { valueAsNumber: true })}
           />
-          {errors.price && (
+          <div className="flex items-center gap-2 mt-1">
+            <input
+              type="checkbox"
+              id="sur-devis"
+              checked={surDevis}
+              onChange={(e) => setSurDevis(e.target.checked)}
+              className="h-4 w-4"
+            />
+            <label htmlFor="sur-devis" className="text-sm text-muted-foreground cursor-pointer">
+              Sur devis
+            </label>
+          </div>
+          {errors.price && !surDevis && (
             <p className="text-sm text-destructive">{errors.price.message}</p>
           )}
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="durationMinutes">Durée (minutes) *</Label>
+          <Label htmlFor="duration">Durée *</Label>
           <Input
-            id="durationMinutes"
-            type="number"
-            min="5"
-            placeholder="60"
-            {...register("durationMinutes", { valueAsNumber: true })}
+            id="duration"
+            type="text"
+            placeholder="ex: 45 min, 2h, 3 mois"
+            {...register("duration")}
           />
-          {errors.durationMinutes && (
-            <p className="text-sm text-destructive">{errors.durationMinutes.message}</p>
+          {errors.duration && (
+            <p className="text-sm text-destructive">{errors.duration.message}</p>
           )}
         </div>
       </div>
