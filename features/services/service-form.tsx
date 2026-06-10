@@ -84,8 +84,7 @@ export function ServiceForm({
             type="number"
             min="0"
             placeholder="15000"
-            disabled={surDevis}
-            {...register("price", { valueAsNumber: true })}
+            {...register("price", { valueAsNumber: true, disabled: surDevis })}
           />
           <div className="flex items-center gap-2 mt-1">
             <input
